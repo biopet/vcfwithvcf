@@ -7,7 +7,7 @@ object VcfWithVcfTest extends BiopetTest {
   @Test
   def testNoArgs(): Unit = {
     intercept[IllegalArgumentException] {
-      ToolTemplate.main(Array())
+      VcfWithVcf.main(Array())
     }
   }
 }
