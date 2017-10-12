@@ -21,6 +21,7 @@ class VcfWithVcfTest extends BiopetTest {
   }
 
   val samplePath: String = resourcePath("/sample.vcf")
+  val wrongContigPath: String = resourcePath("/wrong_contig.vcf")
   val annotationPath: String = resourcePath("/annotation.vcf")
   val veppedPath: String = resourcePath("/VEP_oneline.vcf.gz")
   val unveppedPath: String = resourcePath("/unvep_online.vcf.gz")
@@ -116,6 +117,25 @@ class VcfWithVcfTest extends BiopetTest {
     intercept[IllegalArgumentException] {
       VcfWithVcf.main(args)
     }.getMessage shouldBe "Field 'DP' already exists in input vcf"
+  }
+
+  @Test
+  def testWrongContig(): Unit = {
+    val tmpFile = File.createTempFile("VCFWithVCf.", ".vcf")
+    tmpFile.deleteOnExit()
+    val args = Array("-I",
+      wrongContigPath,
+      "-s",
+      annotationPath,
+      "-o",
+      tmpFile.getAbsolutePath,
+      "-f",
+      "INT",
+      "-R",
+      referenceFasta)
+    intercept[IllegalArgumentException] {
+      VcfWithVcf.main(args)
+    }.getMessage shouldBe "requirement failed: Contig chrX does not exist on reference"
   }
 
   @Test
