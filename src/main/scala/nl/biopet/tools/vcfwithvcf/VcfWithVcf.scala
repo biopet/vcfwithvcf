@@ -148,9 +148,9 @@ object VcfWithVcf extends ToolCommand {
             case FieldMethod.max =>
               header.getInfoHeaderLine(attribute._1).getType match {
                 case VCFHeaderLineType.Integer =>
-                  scalaListToJavaObjectArrayList(List(attribute._2.map(_.toString.toInt).max))
+                  attribute._2.map(_.toString.toInt).max
                 case VCFHeaderLineType.Float =>
-                  scalaListToJavaObjectArrayList(List(attribute._2.map(_.toString.toFloat).max))
+                  attribute._2.map(_.toString.toFloat).max.toString.replace("E-", "e-")
                 case _ =>
                   throw new IllegalArgumentException(
                     "Type of field " + field.inputField + " is not numeric")
@@ -158,9 +158,9 @@ object VcfWithVcf extends ToolCommand {
             case FieldMethod.min =>
               header.getInfoHeaderLine(attribute._1).getType match {
                 case VCFHeaderLineType.Integer =>
-                  scalaListToJavaObjectArrayList(List(attribute._2.map(_.toString.toInt).min))
+                  attribute._2.map(_.toString.toInt).min
                 case VCFHeaderLineType.Float =>
-                  scalaListToJavaObjectArrayList(List(attribute._2.map(_.toString.toFloat).min))
+                  attribute._2.map(_.toString.toFloat).min.toString.replace("E-", "e-")
                 case _ =>
                   throw new IllegalArgumentException(
                     "Type of field " + field.inputField + " is not numeric")

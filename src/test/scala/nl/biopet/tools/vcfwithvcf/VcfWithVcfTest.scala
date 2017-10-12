@@ -80,6 +80,7 @@ class VcfWithVcfTest extends BiopetTest {
     if (!outputFile.getName.endsWith(".bcf")) { // BCF file seems to have rounding errors
       record.getAttributeAsDouble("DOUBLE", -1.0) shouldBe 0.3
       record.getAttributeAsDouble("DOUBLE_MIN", -1.0) shouldBe 3.01e-6
+      record.getAttribute("DOUBLE_MIN") shouldBe "3.01e-6"
       record.getAttributeAsDouble("DOUBLE_MAX", -1.0) shouldBe 0.3
     }
   }
