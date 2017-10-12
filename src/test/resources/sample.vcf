@@ -1,0 +1,5 @@
+##fileformat=VCFv4.2
+##INFO=<ID=DP,Number=1,Type=Integer>
+##contig=<ID=chrQ,length=16571>
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+chrQ	1000	.	C	T	.	.	.

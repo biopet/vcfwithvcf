@@ -20,7 +20,7 @@ object VcfWithVcf extends ToolCommand {
 
     logger.info("Start")
 
-    val reader = new VCFFileReader(cmdArgs.inputFile)
+    val reader = new VCFFileReader(cmdArgs.inputFile, false)
     val secondaryReader = new VCFFileReader(cmdArgs.secondaryVcf)
 
     val referenceDict = FastaUtils.getCachedDict(cmdArgs.referenceFasta)
@@ -141,9 +141,10 @@ object VcfWithVcf extends ToolCommand {
                    header: VCFHeader): VariantContext = {
     fieldMap
       .foldLeft(new VariantContextBuilder(record))((builder, attribute) => {
+        val field = fields.filter(_.outputField == attribute._1).head
         builder.attribute(
           attribute._1,
-          fields.filter(_.outputField == attribute._1).head.fieldMethod match {
+          field.fieldMethod match {
             case FieldMethod.max =>
               header.getInfoHeaderLine(attribute._1).getType match {
                 case VCFHeaderLineType.Integer =>
@@ -152,7 +153,7 @@ object VcfWithVcf extends ToolCommand {
                   scalaListToJavaObjectArrayList(List(attribute._2.map(_.toString.toFloat).max))
                 case _ =>
                   throw new IllegalArgumentException(
-                    "Type of field " + attribute._1 + " is not numeric")
+                    "Type of field " + field.inputField + " is not numeric")
               }
             case FieldMethod.min =>
               header.getInfoHeaderLine(attribute._1).getType match {
@@ -162,7 +163,7 @@ object VcfWithVcf extends ToolCommand {
                   scalaListToJavaObjectArrayList(List(attribute._2.map(_.toString.toFloat).min))
                 case _ =>
                   throw new IllegalArgumentException(
-                    "Type of field " + attribute._1 + " is not numeric")
+                    "Type of field " + field.inputField + " is not numeric")
               }
             case FieldMethod.unique => scalaListToJavaObjectArrayList(attribute._2.distinct)
             case _ =>

@@ -3,6 +3,7 @@ package nl.biopet.tools.vcfwithvcf
 import java.io.File
 import java.util
 
+import htsjdk.variant.variantcontext.VariantContext
 import htsjdk.variant.vcf.VCFFileReader
 import nl.biopet.test.BiopetTest
 import nl.biopet.utils.ngs.VcfUtils
@@ -19,6 +20,8 @@ class VcfWithVcfTest extends BiopetTest {
     }
   }
 
+  val samplePath: String = resourcePath("/sample.vcf")
+  val annotationPath: String = resourcePath("/annotation.vcf")
   val veppedPath: String = resourcePath("/VEP_oneline.vcf.gz")
   val unveppedPath: String = resourcePath("/unvep_online.vcf.gz")
   val referenceFasta: String = resourcePath("/fake_chrQ.fa")
@@ -26,84 +29,102 @@ class VcfWithVcfTest extends BiopetTest {
   val multiPath: String = resourcePath("/chrQ_multiallelic.vcf.gz")
   val rand = new Random()
 
-  @Test
-  def testOutputTypeVcf(): Unit = {
-    val tmpFile = File.createTempFile("VcfWithVcf_", ".vcf")
-    tmpFile.deleteOnExit()
+  def readRecords(file: File): List[VariantContext] = {
+    val reader = new VCFFileReader(file, false)
+    val records = reader.toList
+    reader.close()
+    records
+  }
+
+  def testSimpleValues(outputFile: File): Unit = {
     val arguments = Array("-I",
-      unveppedPath,
+      samplePath,
       "-s",
-      veppedPath,
+      annotationPath,
       "-o",
-      tmpFile.getAbsolutePath,
+      outputFile.getAbsolutePath,
       "-f",
-      "CSQ",
+      "INT",
+      "-f",
+      "DOUBLE",
+      "-f",
+      "STRING",
+      "-f",
+      "MULTI_INT:INT_MIN:min",
+      "-f",
+      "MULTI_INT:INT_MAX:max",
+      "-f",
+      "MULTI_DOUBLE:DOUBLE_MIN:min",
+      "-f",
+      "MULTI_DOUBLE:DOUBLE_MAX:max",
+      "-f",
+      "MULTI_STRING:STRING_unique:unique",
       "-R",
       referenceFasta)
     VcfWithVcf.main(arguments)
+    val record = readRecords(outputFile).head
+    record.hasAttribute("INT") shouldBe true
+    record.getAttributeAsInt("INT", -1) shouldBe 3
+    record.hasAttribute("STRING") shouldBe true
+    record.getAttribute("STRING") shouldBe "bla"
+    record.hasAttribute("INT_MIN") shouldBe true
+    record.getAttributeAsInt("INT_MIN", -1) shouldBe 3
+    record.hasAttribute("INT_MAX") shouldBe true
+    record.getAttributeAsInt("INT_MAX", -1) shouldBe 6
+    record.hasAttribute("STRING_unique") shouldBe true
+    record.getAttribute("STRING_unique") shouldBe "bla"
+
+    record.hasAttribute("DOUBLE") shouldBe true
+    record.hasAttribute("DOUBLE_MIN") shouldBe true
+    record.hasAttribute("DOUBLE_MAX") shouldBe true
+    if (!outputFile.getName.endsWith(".bcf")) { // BCF file seems to have rounding errors
+      record.getAttributeAsDouble("DOUBLE", -1.0) shouldBe 0.3
+      record.getAttributeAsDouble("DOUBLE_MIN", -1.0) shouldBe 3.01e-6
+      record.getAttributeAsDouble("DOUBLE_MAX", -1.0) shouldBe 0.3
+    }
+  }
+
+  @Test
+  def testOutputTypeVcf(): Unit = {
+    val tmpFile = File.createTempFile("VcfWithVcf.", ".vcf")
+    tmpFile.deleteOnExit()
+    testSimpleValues(tmpFile)
   }
 
   @Test
   def testOutputTypeVcfGz(): Unit = {
-    val tmpFile = File.createTempFile("VcfWithVcf_", ".vcf.gz")
+    val tmpFile = File.createTempFile("VcfWithVcf.", ".vcf.gz")
     tmpFile.deleteOnExit()
-    val arguments = Array("-I",
-      unveppedPath,
-      "-s",
-      veppedPath,
-      "-o",
-      tmpFile.getAbsolutePath,
-      "-f",
-      "CSQ",
-      "-R",
-      referenceFasta)
-    VcfWithVcf.main(arguments)
-  }
-
-  @Test
-  def testOutputTypeBcf(): Unit = {
-    val tmpFile = File.createTempFile("VcfWithVcf_", ".bcf")
-    tmpFile.deleteOnExit()
-    val arguments = Array("-I",
-      unveppedPath,
-      "-s",
-      veppedPath,
-      "-o",
-      tmpFile.getAbsolutePath,
-      "-f",
-      "CSQ",
-      "-R",
-      referenceFasta)
-    VcfWithVcf.main(arguments)
+    testSimpleValues(tmpFile)
   }
 
   @Test
   def testOutputFieldException(): Unit = {
-    val tmpFile = File.createTempFile("VCFWithVCf", ".vcf")
+    val tmpFile = File.createTempFile("VCFWithVCf.", ".vcf")
     tmpFile.deleteOnExit()
     val args = Array("-I",
-      unveppedPath,
+      samplePath,
       "-s",
-      veppedPath,
+      annotationPath,
       "-o",
       tmpFile.getAbsolutePath,
       "-f",
-      "CSQ:AC",
+      "INT:DP",
       "-R",
       referenceFasta)
-    an[IllegalArgumentException] should be thrownBy VcfWithVcf.main(args)
-    val thrown = the[IllegalArgumentException] thrownBy VcfWithVcf.main(args)
-    thrown.getMessage should equal("Field 'AC' already exists in input vcf")
+    intercept[IllegalArgumentException] {
+      VcfWithVcf.main(args)
+    }.getMessage shouldBe "Field 'DP' already exists in input vcf"
   }
 
   @Test
   def testInputFieldException(): Unit = {
-    val tmpFile = File.createTempFile("VCFWithVCf", ".vcf")
+    val tmpFile = File.createTempFile("VCFWithVCf.", ".vcf")
     tmpFile.deleteOnExit()
     val args = Array("-I",
-      unveppedPath,
+      samplePath,
       "-s",
-      unveppedPath,
+      annotationPath,
       "-o",
       tmpFile.getAbsolutePath,
       "-f",
@@ -120,18 +141,18 @@ class VcfWithVcfTest extends BiopetTest {
     val tmpFile = File.createTempFile("VcfWithVcf_", ".vcf")
     tmpFile.deleteOnExit()
     val args = Array("-I",
-      unveppedPath,
+      samplePath,
       "-s",
-      veppedPath,
+      annotationPath,
       "-o",
       tmpFile.getAbsolutePath,
       "-f",
-      "CSQ:CSQ:min",
+      "MULTI_STRING:STRING:min",
       "-R",
       referenceFasta)
-    an[IllegalArgumentException] should be thrownBy VcfWithVcf.main(args)
-    val thrown = the[IllegalArgumentException] thrownBy VcfWithVcf.main(args)
-    thrown.getMessage should equal("Type of field CSQ is not numeric")
+    intercept[IllegalArgumentException] {
+      VcfWithVcf.main(args)
+    }.getMessage shouldBe "Type of field MULTI_STRING is not numeric"
   }
 
   @Test
@@ -139,18 +160,18 @@ class VcfWithVcfTest extends BiopetTest {
     val tmpFile = File.createTempFile("VcfWithVcf_", ".vcf")
     tmpFile.deleteOnExit()
     val args = Array("-I",
-      unveppedPath,
+      samplePath,
       "-s",
-      veppedPath,
+      annotationPath,
       "-o",
       tmpFile.getAbsolutePath,
       "-f",
-      "CSQ:CSQ:max",
+      "MULTI_STRING:STRING:max",
       "-R",
       referenceFasta)
-    an[IllegalArgumentException] should be thrownBy VcfWithVcf.main(args)
-    val thrown = the[IllegalArgumentException] thrownBy VcfWithVcf.main(args)
-    thrown.getMessage should equal("Type of field CSQ is not numeric")
+    intercept[IllegalArgumentException] {
+      VcfWithVcf.main(args)
+    }.getMessage shouldBe "Type of field MULTI_STRING is not numeric"
   }
 
   @Test
