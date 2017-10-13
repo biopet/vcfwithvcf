@@ -1,0 +1,10 @@
+##fileformat=VCFv4.2
+##INFO=<ID=INT,Number=1,Type=Integer>
+##INFO=<ID=DOUBLE,Number=1,Type=Float>
+##INFO=<ID=STRING,Number=1,Type=String>
+##INFO=<ID=MULTI_INT,Number=.,Type=Integer>
+##INFO=<ID=MULTI_DOUBLE,Number=.,Type=Float>
+##INFO=<ID=MULTI_STRING,Number=.,Type=String>
+##contig=<ID=chrQ,length=16571>
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+chrQ	1000	.	C	T	.	.	INT=3;DOUBLE=0.3;STRING=bla;MULTI_INT=3,6;MULTI_DOUBLE=0.3,3.01e-6;MULTI_STRING=bla,bla
