@@ -6,7 +6,7 @@ import java.util
 import htsjdk.variant.variantcontext.VariantContext
 import htsjdk.variant.vcf.VCFFileReader
 import nl.biopet.test.BiopetTest
-import nl.biopet.utils.ngs.VcfUtils
+import nl.biopet.utils.ngs.vcf
 import org.testng.annotations.Test
 
 import scala.util.Random
@@ -264,7 +264,7 @@ class VcfWithVcfTest extends BiopetTest {
 
     val secRec = VcfWithVcf.getSecondaryRecords(vepReader, unvepRecord, matchAllele = false)
 
-    secRec.foreach(x => VcfUtils.identicalVariantContext(x, vepRecord) shouldBe true)
+    secRec.foreach(x => vcf.identicalVariantContext(x, vepRecord) shouldBe true)
   }
 
   @Test
@@ -278,7 +278,7 @@ class VcfWithVcfTest extends BiopetTest {
 
     val fieldMap = VcfWithVcf.createFieldMap(List(Fields("CSQ", "CSQ")), vepRecord, secRec, header)
     val createdRecord = VcfWithVcf.createRecord(fieldMap, unvepRecord, List(Fields("CSQ", "CSQ")), header)
-    VcfUtils.identicalVariantContext(createdRecord, vepRecord) shouldBe true
+    vcf.identicalVariantContext(createdRecord, vepRecord) shouldBe true
   }
 
   @Test

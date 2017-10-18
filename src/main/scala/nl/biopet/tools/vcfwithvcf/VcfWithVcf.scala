@@ -5,8 +5,8 @@ import java.util
 import htsjdk.variant.variantcontext.writer.{AsyncVariantContextWriter, VariantContextWriterBuilder}
 import htsjdk.variant.variantcontext.{VariantContext, VariantContextBuilder}
 import htsjdk.variant.vcf._
-import nl.biopet.utils.ngs.FastaUtils
-import nl.biopet.utils.ngs.BamUtils.SamDictCheck
+import nl.biopet.utils.ngs.fasta
+import nl.biopet.utils.ngs.bam.SamDictCheck
 import nl.biopet.utils.tool.ToolCommand
 import nl.biopet.utils.config.Conversions.scalaListToJavaObjectArrayList
 
@@ -23,7 +23,7 @@ object VcfWithVcf extends ToolCommand {
     val reader = new VCFFileReader(cmdArgs.inputFile, false)
     val secondaryReader = new VCFFileReader(cmdArgs.secondaryVcf)
 
-    val referenceDict = FastaUtils.getCachedDict(cmdArgs.referenceFasta)
+    val referenceDict = fasta.getCachedDict(cmdArgs.referenceFasta)
 
     val header = reader.getFileHeader
     val vcfDict = header.getSequenceDictionary match {
