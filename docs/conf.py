@@ -167,7 +167,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     (master_doc, 'VcfWithVcf', u'VcfWithVcf Documentation',
-     author, 'VcfWithVcf', 'One line description of project.',
+     author, 'VcfWithVcf', 'Combine the INFO fields of two VCF files.',
      'Miscellaneous'),
 ]
 
