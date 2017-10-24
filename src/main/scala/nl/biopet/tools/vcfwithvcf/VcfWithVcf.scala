@@ -8,7 +8,7 @@ import htsjdk.variant.vcf._
 import nl.biopet.utils.ngs.fasta
 import nl.biopet.utils.ngs.bam.SamDictCheck
 import nl.biopet.utils.tool.ToolCommand
-import nl.biopet.utils.config.Conversions.scalaListToJavaObjectArrayList
+import nl.biopet.utils.conversions.scalaListToJavaObjectArrayList
 
 import scala.collection.JavaConversions._
 
