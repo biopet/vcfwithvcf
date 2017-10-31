@@ -5,14 +5,14 @@ import java.util
 
 import htsjdk.variant.variantcontext.VariantContext
 import htsjdk.variant.vcf.VCFFileReader
-import nl.biopet.test.BiopetTest
+import nl.biopet.utils.test.tools.ToolTest
 import nl.biopet.utils.ngs.vcf
 import org.testng.annotations.Test
 
 import scala.util.Random
 import scala.collection.JavaConversions._
 
-class VcfWithVcfTest extends BiopetTest {
+class VcfWithVcfTest extends ToolTest[Args] {
   @Test
   def testNoArgs(): Unit = {
     intercept[IllegalArgumentException] {

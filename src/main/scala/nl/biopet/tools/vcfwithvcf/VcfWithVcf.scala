@@ -12,7 +12,7 @@ import nl.biopet.utils.conversions.scalaListToJavaObjectArrayList
 
 import scala.collection.JavaConversions._
 
-object VcfWithVcf extends ToolCommand {
+object VcfWithVcf extends ToolCommand[Args] {
   def main(args: Array[String]): Unit = {
     val parser = new ArgsParser(toolName)
     val cmdArgs =
