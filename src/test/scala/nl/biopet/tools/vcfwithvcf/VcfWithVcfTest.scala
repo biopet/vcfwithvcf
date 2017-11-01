@@ -13,6 +13,7 @@ import scala.util.Random
 import scala.collection.JavaConversions._
 
 class VcfWithVcfTest extends ToolTest[Args] {
+  def toolCommand: VcfWithVcf.type = VcfWithVcf
   @Test
   def testNoArgs(): Unit = {
     intercept[IllegalArgumentException] {
