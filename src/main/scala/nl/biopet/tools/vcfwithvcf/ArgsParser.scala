@@ -7,16 +7,16 @@ import nl.biopet.utils.tool.AbstractOptParser
 class ArgsParser(cmdName: String) extends AbstractOptParser[Args](cmdName) {
   opt[File]('I', "inputFile") required () maxOccurs 1 valueName "<file>" action { (x, c) =>
     c.copy(inputFile = x)
-  }
-  opt[File]('o', "outputFile") required () maxOccurs 1 valueName "<file>" action { (x, c) =>
-    c.copy(outputFile = x)
-  }
+  } text "Input VCF file"
   opt[File]('s', "secondaryVcf") required () maxOccurs 1 valueName "<file>" action { (x, c) =>
     c.copy(secondaryVcf = x)
-  }
+  } text "Second Input VCF file"
+  opt[File]('o', "outputFile") required () maxOccurs 1 valueName "<file>" action { (x, c) =>
+    c.copy(outputFile = x)
+  } text "Output VCF file."
   opt[File]('R', "reference") required () maxOccurs 1 valueName "<file>" action { (x, c) =>
     c.copy(referenceFasta = x)
-  }
+  } text "The refence that was used to call the VCF"
   opt[String]('f', "field") unbounded () valueName "<field> or <input_field:output_field> or <input_field:output_field:method>" action {
     (x, c) =>
       val values = x.split(":")
