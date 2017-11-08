@@ -2,7 +2,10 @@ package nl.biopet.tools.vcfwithvcf
 
 import java.util
 
-import htsjdk.variant.variantcontext.writer.{AsyncVariantContextWriter, VariantContextWriterBuilder}
+import htsjdk.variant.variantcontext.writer.{
+  AsyncVariantContextWriter,
+  VariantContextWriterBuilder
+}
 import htsjdk.variant.variantcontext.{VariantContext, VariantContextBuilder}
 import htsjdk.variant.vcf._
 import nl.biopet.utils.ngs.fasta
@@ -56,9 +59,9 @@ object VcfWithVcf extends ToolCommand[Args] {
       val oldHeaderLine = secondHeader.getInfoHeaderLine(x.inputField)
 
       val newHeaderLine = new VCFInfoHeaderLine(x.outputField,
-        VCFHeaderLineCount.UNBOUNDED,
-        oldHeaderLine.getType,
-        oldHeaderLine.getDescription)
+                                                VCFHeaderLineCount.UNBOUNDED,
+                                                oldHeaderLine.getType,
+                                                oldHeaderLine.getDescription)
       header.addMetaDataLine(newHeaderLine)
     }
     writer.writeHeader(header)
@@ -68,10 +71,12 @@ object VcfWithVcf extends ToolCommand[Args] {
     var counter = 0
     for (record <- reader) {
       require(vcfDict.getSequence(record.getContig) != null,
-        s"Contig ${record.getContig} does not exist on reference")
-      val secondaryRecords = getSecondaryRecords(secondaryReader, record, cmdArgs.matchAllele)
+              s"Contig ${record.getContig} does not exist on reference")
+      val secondaryRecords =
+        getSecondaryRecords(secondaryReader, record, cmdArgs.matchAllele)
 
-      val fieldMap = createFieldMap(cmdArgs.fields, record, secondaryRecords, secondHeader)
+      val fieldMap =
+        createFieldMap(cmdArgs.fields, record, secondaryRecords, secondHeader)
 
       writer.add(createRecord(fieldMap, record, cmdArgs.fields, header))
 
@@ -102,15 +107,17 @@ object VcfWithVcf extends ToolCommand[Args] {
                      secondaryRecords: List[VariantContext],
                      header: VCFHeader): Map[String, List[Any]] = {
     val fieldMap =
-      (for (f <- fields if secondaryRecords.exists(_.hasAttribute(f.inputField))) yield {
+      (for (f <- fields
+            if secondaryRecords.exists(_.hasAttribute(f.inputField))) yield {
         f.outputField -> (for (secondRecord <- secondaryRecords
-                               if secondRecord.hasAttribute(f.inputField)) yield {
-          getSecondaryField(record, secondRecord, f.inputField, header) match {
-            case l: List[_] => l
-            case y: util.ArrayList[_] => y.toList
-            case x => List(x)
-          }
-        }).fold(Nil)(_ ::: _)
+                               if secondRecord.hasAttribute(f.inputField))
+          yield {
+            getSecondaryField(record, secondRecord, f.inputField, header) match {
+              case l: List[_] => l
+              case y: util.ArrayList[_] => y.toList
+              case x => List(x)
+            }
+          }).fold(Nil)(_ ::: _)
       }).toMap
     fieldMap
   }
@@ -131,7 +138,10 @@ object VcfWithVcf extends ToolCommand[Args] {
         .filter(x => record.getAlternateAlleles.exists(x.hasAlternateAllele))
         .toList
     } else {
-      secondaryReader.query(record.getContig, record.getStart, record.getEnd).toIterable.toList
+      secondaryReader
+        .query(record.getContig, record.getStart, record.getEnd)
+        .toIterable
+        .toList
     }
   }
 
@@ -150,7 +160,11 @@ object VcfWithVcf extends ToolCommand[Args] {
                 case VCFHeaderLineType.Integer =>
                   attribute._2.map(_.toString.toInt).max
                 case VCFHeaderLineType.Float =>
-                  attribute._2.map(_.toString.toFloat).max.toString.replace("E-", "e-")
+                  attribute._2
+                    .map(_.toString.toFloat)
+                    .max
+                    .toString
+                    .replace("E-", "e-")
                 case _ =>
                   throw new IllegalArgumentException(
                     "Type of field " + field.inputField + " is not numeric")
@@ -160,12 +174,17 @@ object VcfWithVcf extends ToolCommand[Args] {
                 case VCFHeaderLineType.Integer =>
                   attribute._2.map(_.toString.toInt).min
                 case VCFHeaderLineType.Float =>
-                  attribute._2.map(_.toString.toFloat).min.toString.replace("E-", "e-")
+                  attribute._2
+                    .map(_.toString.toFloat)
+                    .min
+                    .toString
+                    .replace("E-", "e-")
                 case _ =>
                   throw new IllegalArgumentException(
                     "Type of field " + field.inputField + " is not numeric")
               }
-            case FieldMethod.unique => scalaListToJavaObjectArrayList(attribute._2.distinct)
+            case FieldMethod.unique =>
+              scalaListToJavaObjectArrayList(attribute._2.distinct)
             case _ =>
               scalaListToJavaObjectArrayList(attribute._2)
           }
