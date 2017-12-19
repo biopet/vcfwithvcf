@@ -247,4 +247,22 @@ object VcfWithVcf extends ToolCommand[Args] {
       .flatMap(x => refValues.lift(x))
       .toList
   }
+
+  def descriptionText: String =
+    """
+      |This tool merges a VCF file with another VCF file.
+      |It provides several options on how to merge INFO fields with the same name.
+    """.stripMargin
+
+  def manualText: String =
+    s"""
+       |$toolName requires an input VCF, secondary input VCF, output VCF and a reference genome fasta.
+       |It has opptions to merge fileds with the field flag -f.
+    """.stripMargin
+
+  def exampleText: String =
+    """
+      |In order to combine input.vcf with secondary.vcf run the following command:
+    """.stripMargin +
+  example("-I", "input.vcf", "-s", "secondary.vcf","-R", "reference.fa", "-o", "-output.vcf")
 }
