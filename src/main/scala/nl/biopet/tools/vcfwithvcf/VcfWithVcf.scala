@@ -30,7 +30,7 @@ import htsjdk.variant.variantcontext.writer.{
 import htsjdk.variant.variantcontext.{VariantContext, VariantContextBuilder}
 import htsjdk.variant.vcf._
 import nl.biopet.utils.ngs.fasta
-import nl.biopet.utils.ngs.bam.SamDictCheck
+import nl.biopet.utils.ngs.bam.BiopetSamDict
 import nl.biopet.utils.tool.ToolCommand
 import nl.biopet.utils.conversions.scalaListToJavaObjectArrayList
 
