@@ -47,10 +47,9 @@ class ArgsParser(toolCommand: ToolCommand[Args])
     (x, c) =>
       val values = x.split(":")
       if (values.size > 2)
-        c.copy(
-          fields = Fields(values(0),
-                          values(1),
-                          FieldMethod.withName(values(2))) :: c.fields)
+        c.copy(fields = Fields(values(0),
+                               values(1),
+                               FieldMethod.withName(values(2))) :: c.fields)
       else if (values.size > 1)
         c.copy(fields = Fields(values(0), values(1)) :: c.fields)
       else c.copy(fields = Fields(x, x) :: c.fields)
