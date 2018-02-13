@@ -60,7 +60,7 @@ object VcfWithVcf extends ToolCommand[Args] {
 
     secondHeader.getSequenceDictionary match {
       case r if r != null => r.assertSameDictionary(referenceDict, true)
-      case _ =>
+      case _              =>
     }
 
     val writer = new AsyncVariantContextWriter(
@@ -134,9 +134,9 @@ object VcfWithVcf extends ToolCommand[Args] {
                                if secondRecord.hasAttribute(f.inputField))
           yield {
             getSecondaryField(record, secondRecord, f.inputField, header) match {
-              case l: List[_] => l
+              case l: List[_]           => l
               case y: util.ArrayList[_] => y.toList
-              case x => List(x)
+              case x                    => List(x)
             }
           }).fold(Nil)(_ ::: _)
       }).toMap
@@ -229,7 +229,7 @@ object VcfWithVcf extends ToolCommand[Args] {
     header.getInfoHeaderLine(field).getCountType match {
       case VCFHeaderLineCount.A => numberA(record, secondaryRecord, field)
       case VCFHeaderLineCount.R => numberR(record, secondaryRecord, field)
-      case _ => secondaryRecord.getAttribute(field)
+      case _                    => secondaryRecord.getAttribute(field)
     }
   }
 
