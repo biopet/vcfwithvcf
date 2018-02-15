@@ -1,3 +1,24 @@
+/*
+ * Copyright (c) 2014 Biopet
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package nl.biopet.tools.vcfwithvcf
 
 import java.io.File
@@ -6,7 +27,7 @@ import java.util
 import htsjdk.variant.variantcontext.VariantContext
 import htsjdk.variant.vcf.VCFFileReader
 import nl.biopet.utils.test.tools.ToolTest
-import nl.biopet.utils.ngs.vcf.{ BiopetGenotype, BiopetVariantContext}
+import nl.biopet.utils.ngs.vcf.{BiopetGenotype, BiopetVariantContext}
 import org.testng.annotations.Test
 
 import scala.util.Random
@@ -39,7 +60,8 @@ class VcfWithVcfTest extends ToolTest[Args] {
   }
 
   def testSimpleValues(outputFile: File): Unit = {
-    val arguments = Array("-I",
+    val arguments = Array(
+      "-I",
       samplePath,
       "-s",
       annotationPath,
@@ -62,7 +84,8 @@ class VcfWithVcfTest extends ToolTest[Args] {
       "-f",
       "MULTI_STRING:STRING_unique:unique",
       "-R",
-      referenceFasta)
+      referenceFasta
+    )
     VcfWithVcf.main(arguments)
     val record = readRecords(outputFile).head
     record.hasAttribute("INT") shouldBe true
@@ -106,15 +129,15 @@ class VcfWithVcfTest extends ToolTest[Args] {
     val tmpFile = File.createTempFile("VCFWithVCf.", ".vcf")
     tmpFile.deleteOnExit()
     val args = Array("-I",
-      samplePath,
-      "-s",
-      annotationPath,
-      "-o",
-      tmpFile.getAbsolutePath,
-      "-f",
-      "INT:DP",
-      "-R",
-      referenceFasta)
+                     samplePath,
+                     "-s",
+                     annotationPath,
+                     "-o",
+                     tmpFile.getAbsolutePath,
+                     "-f",
+                     "INT:DP",
+                     "-R",
+                     referenceFasta)
     intercept[IllegalArgumentException] {
       VcfWithVcf.main(args)
     }.getMessage shouldBe "Field 'DP' already exists in input vcf"
@@ -125,15 +148,15 @@ class VcfWithVcfTest extends ToolTest[Args] {
     val tmpFile = File.createTempFile("VCFWithVCf.", ".vcf")
     tmpFile.deleteOnExit()
     val args = Array("-I",
-      wrongContigPath,
-      "-s",
-      annotationPath,
-      "-o",
-      tmpFile.getAbsolutePath,
-      "-f",
-      "INT",
-      "-R",
-      referenceFasta)
+                     wrongContigPath,
+                     "-s",
+                     annotationPath,
+                     "-o",
+                     tmpFile.getAbsolutePath,
+                     "-f",
+                     "INT",
+                     "-R",
+                     referenceFasta)
     intercept[IllegalArgumentException] {
       VcfWithVcf.main(args)
     }.getMessage shouldBe "requirement failed: Contig chrX does not exist on reference"
@@ -144,18 +167,19 @@ class VcfWithVcfTest extends ToolTest[Args] {
     val tmpFile = File.createTempFile("VCFWithVCf.", ".vcf")
     tmpFile.deleteOnExit()
     val args = Array("-I",
-      samplePath,
-      "-s",
-      annotationPath,
-      "-o",
-      tmpFile.getAbsolutePath,
-      "-f",
-      "CSQ:NEW_CSQ",
-      "-R",
-      referenceFasta)
+                     samplePath,
+                     "-s",
+                     annotationPath,
+                     "-o",
+                     tmpFile.getAbsolutePath,
+                     "-f",
+                     "CSQ:NEW_CSQ",
+                     "-R",
+                     referenceFasta)
     an[IllegalArgumentException] should be thrownBy VcfWithVcf.main(args)
     val thrown = the[IllegalArgumentException] thrownBy VcfWithVcf.main(args)
-    thrown.getMessage should equal("Field 'CSQ' does not exist in secondary vcf")
+    thrown.getMessage should equal(
+      "Field 'CSQ' does not exist in secondary vcf")
   }
 
   @Test
@@ -163,15 +187,15 @@ class VcfWithVcfTest extends ToolTest[Args] {
     val tmpFile = File.createTempFile("VcfWithVcf_", ".vcf")
     tmpFile.deleteOnExit()
     val args = Array("-I",
-      samplePath,
-      "-s",
-      annotationPath,
-      "-o",
-      tmpFile.getAbsolutePath,
-      "-f",
-      "MULTI_STRING:STRING:min",
-      "-R",
-      referenceFasta)
+                     samplePath,
+                     "-s",
+                     annotationPath,
+                     "-o",
+                     tmpFile.getAbsolutePath,
+                     "-f",
+                     "MULTI_STRING:STRING:min",
+                     "-R",
+                     referenceFasta)
     intercept[IllegalArgumentException] {
       VcfWithVcf.main(args)
     }.getMessage shouldBe "Type of field MULTI_STRING is not numeric"
@@ -182,15 +206,15 @@ class VcfWithVcfTest extends ToolTest[Args] {
     val tmpFile = File.createTempFile("VcfWithVcf_", ".vcf")
     tmpFile.deleteOnExit()
     val args = Array("-I",
-      samplePath,
-      "-s",
-      annotationPath,
-      "-o",
-      tmpFile.getAbsolutePath,
-      "-f",
-      "MULTI_STRING:STRING:max",
-      "-R",
-      referenceFasta)
+                     samplePath,
+                     "-s",
+                     annotationPath,
+                     "-o",
+                     tmpFile.getAbsolutePath,
+                     "-f",
+                     "MULTI_STRING:STRING:max",
+                     "-R",
+                     referenceFasta)
     intercept[IllegalArgumentException] {
       VcfWithVcf.main(args)
     }.getMessage shouldBe "Type of field MULTI_STRING is not numeric"
@@ -228,7 +252,8 @@ class VcfWithVcfTest extends ToolTest[Args] {
     fields :::= List(Fields("VQSLOD", "VQSLOD"))
     fields :::= List(Fields("culprit", "culprit"))
 
-    val fieldMap = VcfWithVcf.createFieldMap(fields, unvepRecord, List(unvepRecord), header)
+    val fieldMap =
+      VcfWithVcf.createFieldMap(fields, unvepRecord, List(unvepRecord), header)
 
     fieldMap("FG") shouldBe List("intron")
     fieldMap("FD") shouldBe List("unknown")
@@ -259,26 +284,38 @@ class VcfWithVcfTest extends ToolTest[Args] {
 
   @Test
   def testGetSecondaryRecords(): Unit = {
-    val unvepRecord = new VCFFileReader(new File(unveppedPath)).iterator().next()
+    val unvepRecord =
+      new VCFFileReader(new File(unveppedPath)).iterator().next()
     val vepReader = new VCFFileReader(new File(veppedPath))
     val vepRecord = vepReader.iterator().next()
 
-    val secRec = VcfWithVcf.getSecondaryRecords(vepReader, unvepRecord, matchAllele = false)
+    val secRec = VcfWithVcf.getSecondaryRecords(vepReader,
+                                                unvepRecord,
+                                                matchAllele = false)
 
     secRec.foreach(x => x.identicalVariantContext(vepRecord) shouldBe true)
   }
 
   @Test
   def testCreateRecord(): Unit = {
-    val unvepRecord = new VCFFileReader(new File(unveppedPath)).iterator().next()
+    val unvepRecord =
+      new VCFFileReader(new File(unveppedPath)).iterator().next()
     val vepReader = new VCFFileReader(new File(veppedPath))
     val header = vepReader.getFileHeader
     val vepRecord = vepReader.iterator().next()
 
-    val secRec = VcfWithVcf.getSecondaryRecords(vepReader, unvepRecord, matchAllele = false)
+    val secRec = VcfWithVcf.getSecondaryRecords(vepReader,
+                                                unvepRecord,
+                                                matchAllele = false)
 
-    val fieldMap = VcfWithVcf.createFieldMap(List(Fields("CSQ", "CSQ")), vepRecord, secRec, header)
-    val createdRecord = VcfWithVcf.createRecord(fieldMap, unvepRecord, List(Fields("CSQ", "CSQ")), header)
+    val fieldMap = VcfWithVcf.createFieldMap(List(Fields("CSQ", "CSQ")),
+                                             vepRecord,
+                                             secRec,
+                                             header)
+    val createdRecord = VcfWithVcf.createRecord(fieldMap,
+                                                unvepRecord,
+                                                List(Fields("CSQ", "CSQ")),
+                                                header)
     createdRecord.identicalVariantContext(vepRecord) shouldBe true
   }
 
@@ -306,15 +343,15 @@ class VcfWithVcfTest extends ToolTest[Args] {
     val tmpFile = File.createTempFile("numberA", ".vcf.gz")
     tmpFile.deleteOnExit()
     val arguments = Array("-I",
-      monoPath,
-      "-s",
-      multiPath,
-      "-o",
-      tmpFile.getAbsolutePath,
-      "-f",
-      "AF:MULTI_AF",
-      "-R",
-      referenceFasta)
+                          monoPath,
+                          "-s",
+                          multiPath,
+                          "-o",
+                          tmpFile.getAbsolutePath,
+                          "-f",
+                          "AF:MULTI_AF",
+                          "-R",
+                          referenceFasta)
     VcfWithVcf.main(arguments)
     val annotatedRecord = new VCFFileReader(tmpFile).iterator().next()
     annotatedRecord.getAttribute("MULTI_AF").toString shouldBe "0.333"
@@ -326,21 +363,21 @@ class VcfWithVcfTest extends ToolTest[Args] {
     val tmpFile = File.createTempFile("numberR", ".vcf.gz")
     tmpFile.deleteOnExit()
     val arguments = Array("-I",
-      monoPath,
-      "-s",
-      multiPath,
-      "-o",
-      tmpFile.getAbsolutePath,
-      "-f",
-      "ALL_ALLELE:MULTI_ALL_ALLELE",
-      "-R",
-      referenceFasta)
+                          monoPath,
+                          "-s",
+                          multiPath,
+                          "-o",
+                          tmpFile.getAbsolutePath,
+                          "-f",
+                          "ALL_ALLELE:MULTI_ALL_ALLELE",
+                          "-R",
+                          referenceFasta)
     VcfWithVcf.main(arguments)
     val annotatedRecord = new VCFFileReader(tmpFile).iterator().next()
     annotatedRecord.getAttribute("MULTI_ALL_ALLELE") match {
-      case l: List[_] => l shouldBe List("C", "A")
+      case l: List[_]           => l shouldBe List("C", "A")
       case u: util.ArrayList[_] => u.toList shouldBe List("C", "A")
-      case _ => throw new IllegalStateException("Not a list")
+      case _                    => throw new IllegalStateException("Not a list")
     }
   }
 
