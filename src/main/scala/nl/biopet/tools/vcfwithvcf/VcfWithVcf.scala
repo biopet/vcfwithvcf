@@ -45,7 +45,7 @@ object VcfWithVcf extends ToolCommand[Args] {
     logger.info("Start")
 
     val reader = new VCFFileReader(cmdArgs.inputFile, false)
-    val secondaryReader = new VCFFileReader(cmdArgs.secondaryVcf)
+    val secondaryReader = cmdArgs.secondaryVcf.map(new VCFFileReader(_))
 
     val referenceDict = fasta.getCachedDict(cmdArgs.referenceFasta)
 
@@ -56,7 +56,7 @@ object VcfWithVcf extends ToolCommand[Args] {
         r
       case _ => referenceDict
     }
-    val secondHeader = secondaryReader.getFileHeader
+    val secondHeader = secondaryReader.map(_.getFileHeader).getOrElse(header)
 
     secondHeader.getSequenceDictionary match {
       case r if r != null => r.assertSameDictionary(referenceDict, true)
@@ -93,8 +93,9 @@ object VcfWithVcf extends ToolCommand[Args] {
     for (record <- reader) {
       require(vcfDict.getSequence(record.getContig) != null,
               s"Contig ${record.getContig} does not exist on reference")
-      val secondaryRecords =
-        getSecondaryRecords(secondaryReader, record, cmdArgs.matchAllele)
+      val secondaryRecords = secondaryReader
+        .map(getSecondaryRecords(_, record, cmdArgs.matchAllele))
+        .getOrElse(record :: Nil)
 
       val fieldMap =
         createFieldMap(cmdArgs.fields, record, secondaryRecords, secondHeader)
@@ -111,7 +112,7 @@ object VcfWithVcf extends ToolCommand[Args] {
     logger.debug("Closing readers")
     writer.close()
     reader.close()
-    secondaryReader.close()
+    secondaryReader.foreach(_.close())
     logger.info("Done")
   }
 
