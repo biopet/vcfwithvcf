@@ -181,7 +181,7 @@ object VcfWithVcf extends ToolCommand[Args] {
               header.getInfoHeaderLine(attribute._1).getType match {
                 case VCFHeaderLineType.Integer =>
                   attribute._2.map(_.toString.toInt).max
-                case VCFHeaderLineType.Float =>
+                case VCFHeaderLineType.Float | VCFHeaderLineType.String =>
                   attribute._2
                     .map(_.toString.toFloat)
                     .max
@@ -195,7 +195,7 @@ object VcfWithVcf extends ToolCommand[Args] {
               header.getInfoHeaderLine(attribute._1).getType match {
                 case VCFHeaderLineType.Integer =>
                   attribute._2.map(_.toString.toInt).min
-                case VCFHeaderLineType.Float =>
+                case VCFHeaderLineType.Float | VCFHeaderLineType.String =>
                   attribute._2
                     .map(_.toString.toFloat)
                     .min
