@@ -172,60 +172,62 @@ object VcfWithVcf extends ToolCommand[Args] {
                    fields: List[Fields],
                    header: VCFHeader): VariantContext = {
     fieldMap
-      .foldLeft(new VariantContextBuilder(record))((builder, attribute) => {
-        val field = fields.filter(_.outputField == attribute._1).head
-        builder.attribute(
-          attribute._1,
-          field.fieldMethod match {
-            case FieldMethod.max =>
-              header.getInfoHeaderLine(attribute._1).getType match {
-                case VCFHeaderLineType.Integer =>
-                  attribute._2.map(_.toString.toInt).max
-                case VCFHeaderLineType.Float | VCFHeaderLineType.String =>
-                  try {
-                    attribute._2
-                      .map(_.toString.toFloat)
-                      .max
-                      .toString
-                      .replace("E-", "e-")
-                  } catch {
-                    case e: NumberFormatException =>
-                      throw new IllegalArgumentException(
-                        "Type of field " + field.inputField + " is not numeric",
-                        e)
-                  }
-                case _ =>
-                  throw new IllegalArgumentException(
-                    "Type of field " + field.inputField + " is not numeric")
-              }
-            case FieldMethod.min =>
-              header.getInfoHeaderLine(attribute._1).getType match {
-                case VCFHeaderLineType.Integer =>
-                  attribute._2.map(_.toString.toInt).min
-                case VCFHeaderLineType.Float | VCFHeaderLineType.String =>
-                  try {
-                    attribute._2
-                      .map(_.toString.toFloat)
-                      .min
-                      .toString
-                      .replace("E-", "e-")
-                  } catch {
-                    case e: NumberFormatException =>
-                      throw new IllegalArgumentException(
-                        "Type of field " + field.inputField + " is not numeric",
-                        e)
-                  }
-                case _ =>
-                  throw new IllegalArgumentException(
-                    "Type of field " + field.inputField + " is not numeric")
-              }
-            case FieldMethod.unique =>
-              scalaListToJavaObjectArrayList(attribute._2.distinct)
-            case _ =>
-              scalaListToJavaObjectArrayList(attribute._2)
-          }
-        )
-      })
+      .foldLeft(new VariantContextBuilder(record)) {
+        case (builder, (key, values)) => {
+          val field = fields.filter(_.outputField == key).head
+          builder.attribute(
+            key,
+            field.fieldMethod match {
+              case FieldMethod.max =>
+                header.getInfoHeaderLine(key).getType match {
+                  case VCFHeaderLineType.Integer =>
+                    values.map(_.toString.toInt).max
+                  case VCFHeaderLineType.Float | VCFHeaderLineType.String =>
+                    try {
+                      values
+                        .map(_.toString.toFloat)
+                        .max
+                        .toString
+                        .replace("E-", "e-")
+                    } catch {
+                      case e: NumberFormatException =>
+                        throw new IllegalArgumentException(
+                          "Type of field " + field.inputField + " is not numeric",
+                          e)
+                    }
+                  case _ =>
+                    throw new IllegalArgumentException(
+                      "Type of field " + field.inputField + " is not numeric")
+                }
+              case FieldMethod.min =>
+                header.getInfoHeaderLine(key).getType match {
+                  case VCFHeaderLineType.Integer =>
+                    values.map(_.toString.toInt).min
+                  case VCFHeaderLineType.Float | VCFHeaderLineType.String =>
+                    try {
+                      values
+                        .map(_.toString.toFloat)
+                        .min
+                        .toString
+                        .replace("E-", "e-")
+                    } catch {
+                      case e: NumberFormatException =>
+                        throw new IllegalArgumentException(
+                          "Type of field " + field.inputField + " is not numeric",
+                          e)
+                    }
+                  case _ =>
+                    throw new IllegalArgumentException(
+                      "Type of field " + field.inputField + " is not numeric")
+                }
+              case FieldMethod.unique =>
+                scalaListToJavaObjectArrayList(values.distinct)
+              case _ =>
+                scalaListToJavaObjectArrayList(values)
+            }
+          )
+        }
+      }
       .make()
   }
 
