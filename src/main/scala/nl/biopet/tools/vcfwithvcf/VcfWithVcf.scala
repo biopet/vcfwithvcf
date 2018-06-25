@@ -182,11 +182,18 @@ object VcfWithVcf extends ToolCommand[Args] {
                 case VCFHeaderLineType.Integer =>
                   attribute._2.map(_.toString.toInt).max
                 case VCFHeaderLineType.Float | VCFHeaderLineType.String =>
-                  attribute._2
-                    .map(_.toString.toFloat)
-                    .max
-                    .toString
-                    .replace("E-", "e-")
+                  try {
+                    attribute._2
+                      .map(_.toString.toFloat)
+                      .max
+                      .toString
+                      .replace("E-", "e-")
+                  } catch {
+                    case e: NumberFormatException =>
+                      throw new IllegalArgumentException(
+                        "Type of field " + field.inputField + " is not numeric",
+                        e)
+                  }
                 case _ =>
                   throw new IllegalArgumentException(
                     "Type of field " + field.inputField + " is not numeric")
@@ -196,11 +203,18 @@ object VcfWithVcf extends ToolCommand[Args] {
                 case VCFHeaderLineType.Integer =>
                   attribute._2.map(_.toString.toInt).min
                 case VCFHeaderLineType.Float | VCFHeaderLineType.String =>
-                  attribute._2
-                    .map(_.toString.toFloat)
-                    .min
-                    .toString
-                    .replace("E-", "e-")
+                  try {
+                    attribute._2
+                      .map(_.toString.toFloat)
+                      .min
+                      .toString
+                      .replace("E-", "e-")
+                  } catch {
+                    case e: NumberFormatException =>
+                      throw new IllegalArgumentException(
+                        "Type of field " + field.inputField + " is not numeric",
+                        e)
+                  }
                 case _ =>
                   throw new IllegalArgumentException(
                     "Type of field " + field.inputField + " is not numeric")
