@@ -173,12 +173,12 @@ object VcfWithVcf extends ToolCommand[Args] {
                    header: VCFHeader): VariantContext = {
     fieldMap
       .foldLeft(new VariantContextBuilder(record)) {
-        case (builder, (key, values)) => {
-          val field = fields.filter(_.outputField == key).head
+        case (builder, (key, values)) =>
+          val field = fields.find(_.outputField == key)
           builder.attribute(
             key,
-            field.fieldMethod match {
-              case FieldMethod.max =>
+            field.map(_.fieldMethod) match {
+              case Some(FieldMethod.max) =>
                 header.getInfoHeaderLine(key).getType match {
                   case VCFHeaderLineType.Integer =>
                     values.map(_.toString.toInt).max
@@ -192,14 +192,16 @@ object VcfWithVcf extends ToolCommand[Args] {
                     } catch {
                       case e: NumberFormatException =>
                         throw new IllegalArgumentException(
-                          "Type of field " + field.inputField + " is not numeric",
+                          "Type of field " + field
+                            .map(_.inputField) + " is not numeric",
                           e)
                     }
                   case _ =>
                     throw new IllegalArgumentException(
-                      "Type of field " + field.inputField + " is not numeric")
+                      "Type of field " + field
+                        .map(_.inputField) + " is not numeric")
                 }
-              case FieldMethod.min =>
+              case Some(FieldMethod.min) =>
                 header.getInfoHeaderLine(key).getType match {
                   case VCFHeaderLineType.Integer =>
                     values.map(_.toString.toInt).min
@@ -213,20 +215,21 @@ object VcfWithVcf extends ToolCommand[Args] {
                     } catch {
                       case e: NumberFormatException =>
                         throw new IllegalArgumentException(
-                          "Type of field " + field.inputField + " is not numeric",
+                          "Type of field " + field
+                            .map(_.inputField) + " is not numeric",
                           e)
                     }
                   case _ =>
                     throw new IllegalArgumentException(
-                      "Type of field " + field.inputField + " is not numeric")
+                      "Type of field " + field
+                        .map(_.inputField) + " is not numeric")
                 }
-              case FieldMethod.unique =>
+              case Some(FieldMethod.unique) =>
                 scalaListToJavaObjectArrayList(values.distinct)
               case _ =>
                 scalaListToJavaObjectArrayList(values)
             }
           )
-        }
       }
       .make()
   }
