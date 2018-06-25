@@ -26,12 +26,12 @@ import java.util
 
 import htsjdk.variant.variantcontext.VariantContext
 import htsjdk.variant.vcf.VCFFileReader
+import nl.biopet.utils.ngs.vcf.BiopetVariantContext
 import nl.biopet.utils.test.tools.ToolTest
-import nl.biopet.utils.ngs.vcf.{BiopetGenotype, BiopetVariantContext}
 import org.testng.annotations.Test
 
-import scala.util.Random
 import scala.collection.JavaConversions._
+import scala.util.Random
 
 class VcfWithVcfTest extends ToolTest[Args] {
   def toolCommand: VcfWithVcf.type = VcfWithVcf
@@ -198,7 +198,7 @@ class VcfWithVcfTest extends ToolTest[Args] {
                      referenceFasta)
     intercept[IllegalArgumentException] {
       VcfWithVcf.main(args)
-    }.getMessage shouldBe "Type of field MULTI_STRING is not numeric"
+    }.getMessage shouldBe "Type of field Some(MULTI_STRING) is not numeric"
   }
 
   @Test
@@ -217,7 +217,7 @@ class VcfWithVcfTest extends ToolTest[Args] {
                      referenceFasta)
     intercept[IllegalArgumentException] {
       VcfWithVcf.main(args)
-    }.getMessage shouldBe "Type of field MULTI_STRING is not numeric"
+    }.getMessage shouldBe "Type of field Some(MULTI_STRING) is not numeric"
   }
 
   @Test
