@@ -45,7 +45,7 @@ object VcfWithVcf extends ToolCommand[Args] {
     logger.info("Start")
 
     val reader = new VCFFileReader(cmdArgs.inputFile, false)
-    val secondaryReader = new VCFFileReader(cmdArgs.secondaryVcf)
+    val secondaryReader = cmdArgs.secondaryVcf.map(new VCFFileReader(_))
 
     val referenceDict = fasta.getCachedDict(cmdArgs.referenceFasta)
 
@@ -56,7 +56,7 @@ object VcfWithVcf extends ToolCommand[Args] {
         r
       case _ => referenceDict
     }
-    val secondHeader = secondaryReader.getFileHeader
+    val secondHeader = secondaryReader.map(_.getFileHeader).getOrElse(header)
 
     secondHeader.getSequenceDictionary match {
       case r if r != null => r.assertSameDictionary(referenceDict, true)
@@ -93,8 +93,9 @@ object VcfWithVcf extends ToolCommand[Args] {
     for (record <- reader) {
       require(vcfDict.getSequence(record.getContig) != null,
               s"Contig ${record.getContig} does not exist on reference")
-      val secondaryRecords =
-        getSecondaryRecords(secondaryReader, record, cmdArgs.matchAllele)
+      val secondaryRecords = secondaryReader
+        .map(getSecondaryRecords(_, record, cmdArgs.matchAllele))
+        .getOrElse(record :: Nil)
 
       val fieldMap =
         createFieldMap(cmdArgs.fields, record, secondaryRecords, secondHeader)
@@ -111,7 +112,7 @@ object VcfWithVcf extends ToolCommand[Args] {
     logger.debug("Closing readers")
     writer.close()
     reader.close()
-    secondaryReader.close()
+    secondaryReader.foreach(_.close())
     logger.info("Done")
   }
 
@@ -171,46 +172,65 @@ object VcfWithVcf extends ToolCommand[Args] {
                    fields: List[Fields],
                    header: VCFHeader): VariantContext = {
     fieldMap
-      .foldLeft(new VariantContextBuilder(record))((builder, attribute) => {
-        val field = fields.filter(_.outputField == attribute._1).head
-        builder.attribute(
-          attribute._1,
-          field.fieldMethod match {
-            case FieldMethod.max =>
-              header.getInfoHeaderLine(attribute._1).getType match {
-                case VCFHeaderLineType.Integer =>
-                  attribute._2.map(_.toString.toInt).max
-                case VCFHeaderLineType.Float =>
-                  attribute._2
-                    .map(_.toString.toFloat)
-                    .max
-                    .toString
-                    .replace("E-", "e-")
-                case _ =>
-                  throw new IllegalArgumentException(
-                    "Type of field " + field.inputField + " is not numeric")
-              }
-            case FieldMethod.min =>
-              header.getInfoHeaderLine(attribute._1).getType match {
-                case VCFHeaderLineType.Integer =>
-                  attribute._2.map(_.toString.toInt).min
-                case VCFHeaderLineType.Float =>
-                  attribute._2
-                    .map(_.toString.toFloat)
-                    .min
-                    .toString
-                    .replace("E-", "e-")
-                case _ =>
-                  throw new IllegalArgumentException(
-                    "Type of field " + field.inputField + " is not numeric")
-              }
-            case FieldMethod.unique =>
-              scalaListToJavaObjectArrayList(attribute._2.distinct)
-            case _ =>
-              scalaListToJavaObjectArrayList(attribute._2)
-          }
-        )
-      })
+      .foldLeft(new VariantContextBuilder(record)) {
+        case (builder, (key, values)) =>
+          val field = fields.find(_.outputField == key)
+          builder.attribute(
+            key,
+            field.map(_.fieldMethod) match {
+              case Some(FieldMethod.max) =>
+                header.getInfoHeaderLine(key).getType match {
+                  case VCFHeaderLineType.Integer =>
+                    values.map(_.toString.toInt).max
+                  case VCFHeaderLineType.Float | VCFHeaderLineType.String =>
+                    try {
+                      values
+                        .map(_.toString.toFloat)
+                        .max
+                        .toString
+                        .replace("E-", "e-")
+                    } catch {
+                      case e: NumberFormatException =>
+                        throw new IllegalArgumentException(
+                          "Type of field " + field
+                            .map(_.inputField) + " is not numeric",
+                          e)
+                    }
+                  case _ =>
+                    throw new IllegalArgumentException(
+                      "Type of field " + field
+                        .map(_.inputField) + " is not numeric")
+                }
+              case Some(FieldMethod.min) =>
+                header.getInfoHeaderLine(key).getType match {
+                  case VCFHeaderLineType.Integer =>
+                    values.map(_.toString.toInt).min
+                  case VCFHeaderLineType.Float | VCFHeaderLineType.String =>
+                    try {
+                      values
+                        .map(_.toString.toFloat)
+                        .min
+                        .toString
+                        .replace("E-", "e-")
+                    } catch {
+                      case e: NumberFormatException =>
+                        throw new IllegalArgumentException(
+                          "Type of field " + field
+                            .map(_.inputField) + " is not numeric",
+                          e)
+                    }
+                  case _ =>
+                    throw new IllegalArgumentException(
+                      "Type of field " + field
+                        .map(_.inputField) + " is not numeric")
+                }
+              case Some(FieldMethod.unique) =>
+                scalaListToJavaObjectArrayList(values.distinct)
+              case _ =>
+                scalaListToJavaObjectArrayList(values)
+            }
+          )
+      }
       .make()
   }
 

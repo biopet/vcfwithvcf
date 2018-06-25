@@ -26,6 +26,6 @@ import java.io.File
 case class Args(inputFile: File = null,
                 outputFile: File = null,
                 referenceFasta: File = null,
-                secondaryVcf: File = null,
+                secondaryVcf: Option[File] = None,
                 fields: List[Fields] = Nil,
                 matchAllele: Boolean = true)
